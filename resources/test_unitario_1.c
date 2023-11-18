@@ -16,7 +16,7 @@ int ejecutarComando(char* comando) {
     //Si el pid es 0, el codigo dentro de este bloque se ejecuta en el proceso hijo.
     if (pid == 0) {
         
-        //El comando se divide en tokens utilizando strtok y se almacenan en el array args.
+        //El comando se divide en tokens utilizando strtok y se almacenan en el array args
         char *args[MAX_LINE / 2 + 1];
         char *token = strtok(comando, " ");
         int i = 0;
