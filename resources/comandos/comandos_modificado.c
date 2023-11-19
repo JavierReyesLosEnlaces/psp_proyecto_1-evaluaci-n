@@ -12,6 +12,17 @@ int main()
     char input[MAX_LINE]; // Es una cadena de caracteres que almacena la entrada del usuario
     int should_run = 1;   // Variable de control para el bucle principal
 
+    #define HISTORY_SIZE 10
+
+    struct CommandHistory {
+        char commands[HISTORY_SIZE][MAX_LINE];
+        int count;
+    };
+
+    struct CommandHistory historial;
+    historial.count = 0;
+
+
     while (should_run)
     { // Es como un while(true), un "si no ha concluido"
         printf("MiShell> ");
@@ -19,6 +30,10 @@ int main()
 
         fgets(input, MAX_LINE, stdin); // Lee la entrada del usuario desde la consola y lo mete en la variable input
                                        // stdin -> entrada estándar (por teclado)
+
+        strcpy(historial.commands[historial.count], input);
+        historial.count++;
+
         input[strlen(input) - 1] = '\0'; 
         // fgets incluye el carácter de nueva línea ('\n') al final de la cadena leída desde la entrada estándar, y luego se elimina en la línea siguiente con input[strlen(input) - 1] = '\0';.
         // input[strlen(input) - 1] = '\0'; -> verifica que el último caracter de la cadena "input" se le asigne el caracter nulo
@@ -26,6 +41,11 @@ int main()
 
         if (strcmp(input, "exit") == 0) // strcmp(a,b) compara a y b. Si es cierto, "se ha concluido" -> 0
         {
+            for (size_t i = 0; i < historial.count; i++)
+            {
+                printf(historial.commands[i]);
+            }
+            
             should_run = 0; // se ha concluido el "should_run"
         }
         else
@@ -37,7 +57,7 @@ int main()
                 char *args[MAX_LINE / 2 + 1];     // * es como un puntero       char *args[MAX_LINE / 2 + 1] es como un array de punteros a caracteres de tamaño "MAX_LINE / 2 + 1"
                 char *token = strtok(input, " "); // strtok -> divide la entrada en tokens usando espacios como delimitadores
                                                   // En otras palabras, descompone una cadena más grande en partes más pequeñas o tokens basándose en ciertos caracteres de separación
-                                                  // En este caso, el caracter de separación es un espacio
+                                              // En este caso, el caracter de separación es un espacio
                 int i = 0;
                 while (token != NULL) // Mientras el token es distinto de null
                 {
@@ -58,6 +78,7 @@ int main()
                 args: Es el array de punteros a caracteres que representa los argumentos del programa.
                 Cada elemento en args es un puntero a una cadena de caracteres, y la última entrada en este array debe ser NULL para indicar el final de la lista de argumentos.
                 */
+               
 
                 exit(0); // Sale del proceso hijo
             }
