@@ -17,12 +17,10 @@ int main()
         printf("MiShell> ");
         fflush(stdout); // Limpia el buffer de salida para asegurar que se imprima el mensaje
 
-        fgets(input, MAX_LINE, stdin); // Lee la entrada del usuario desde la consola
+        fgets(input, MAX_LINE, stdin); // Lee la entrada del usuario desde la consola y lo mete en la variable input
                                        // stdin -> entrada estándar (por teclado)
-
-        input[strlen(input) - 1] = '\0'; // strlen(input) devuelve la longitud del string "input"
-                                         // '\0' -> null
-                                         // se resta 1 porque queremos acceder al último valor y las cadenas están indexadas en 0
+        input[strlen(input) - 1] = '\0'; 
+        // fgets incluye el carácter de nueva línea ('\n') al final de la cadena leída desde la entrada estándar, y luego se elimina en la línea siguiente con input[strlen(input) - 1] = '\0';.
         // input[strlen(input) - 1] = '\0'; -> verifica que el último caracter de la cadena "input" se le asigne el caracter nulo
         // el último caracter es el salto de línea y queremos que sea nulo, por eso lo ponemos como nulo
 
@@ -41,7 +39,7 @@ int main()
                                                   // En otras palabras, descompone una cadena más grande en partes más pequeñas o tokens basándose en ciertos caracteres de separación
                                                   // En este caso, el caracter de separación es un espacio
                 int i = 0;
-                while (token != NULL) // Mientras el token es null
+                while (token != NULL) // Mientras el token es distinto de null
                 {
                     args[i] = token; // Almacena cada token como un argumento
                     token = strtok(NULL, " ");
