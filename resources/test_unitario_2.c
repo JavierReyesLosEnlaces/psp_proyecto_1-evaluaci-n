@@ -7,11 +7,13 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-//Se define una constante entera (int) con valor 80. El tipo de asigna de manera implícita
+/*Se define una constante entera (int) con valor 80. 
+El tipo se asigna de manera implícita*/
 #define MAX_LINE 80
 
 /*Se declara y describe una función llamada ejecutarComando. 
-Esta función recibe por parámetros un puntero que apunta a una localización en memoria en formato Char*/
+    -Esta función recibe por parámetros un tipo puntero a char 
+    - Los punteros apuntan a una dirección de memoria */
 
 int ejecutarComando(char* comando) {
 	
@@ -39,7 +41,7 @@ int ejecutarComando(char* comando) {
             args[i] = token;
 			
 			/*Se vuelve a dividir la cadena, hasta que token sea NULL
-			Solo en la primera tokenización le pasamos la cadena*/
+			    -Solo en la primera tokenización le pasamos la cadena*/
             token = strtok(NULL, " ");
 			//Se suma 1 a la  "i"
             i++;
@@ -49,6 +51,10 @@ int ejecutarComando(char* comando) {
         args[i] = NULL;
 
 		/*TO DO: definir esto wtf*/
+
+        /*execvp es una función que ejecuta un programa desde el programa en C
+            -Busca el programa especifiado en el primer argumento
+            -Ejecuta ese programa con los argumentos proporcioandos en el segundo argumento*/
         execvp(args[0], args);
 		
 		//La función exit(0) termina el proceso hijo
