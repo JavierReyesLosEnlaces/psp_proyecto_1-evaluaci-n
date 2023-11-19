@@ -1,0 +1,4 @@
+1. Se ha añadido un contador de comandos introducidos.
+Al final del programa se muestra un mensaje de "Fin de programa" y el número total de comandos introducidos.
+2. Se ha añadido un listado de comandos introducidos.
+Al final del programa se muestra un mensaje de "HISTORIAL DE COMANDOS INTRODUCIDOS:" seguido de una lista de comandos introducidos
