@@ -4,7 +4,8 @@
 #include <unistd.h>// Para la funcion fork y otras llamadas al sistema.
 #include <sys/types.h>// Para tipos de datos relacionados con llamadas al sistema.
 #include <sys/wait.h>// Para la funcion wait y macros relacionadas.
-
+#include <dirent.h> // Para manejar operaciones de directorios (abrir, leer, cerrar).
+#include <sys/stat.h> // Para obtener información sobre archivos y directorios
             
 #define MAX_LINE 80// constante que representa la longitud maxima de la linea de comando.
 
@@ -16,15 +17,100 @@
 
 int comprobarcpucommand(char* comando) {
 
-        printf("Va a dejar la ventana actual (Para salir presione ctrl + C), presiona enter.....");
-        fflush(stdout); // Asegura que el mensaje se imprima antes de la pausa
-        getchar();
+    printf("Va a dejar la ventana actual (Para salir presione ctrl + C), presiona enter.....");
+    fflush(stdout); // Asegura que el mensaje se imprima antes de la pausa
+    getchar();
         
-        char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";// Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
+    char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";// Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
         
-        system(newComandoCpu);// se ejecuta el comando
+    system(newComandoCpu);// se ejecuta el comando
 
-        return 2;
+    return 2;
+}
+
+        //-------------------------------------------------------------------------------------------
+        //MODIFICACION 2 -> Usamos este metodo, para manejar la informacion de nuestro directorio, 
+        // con el mostramos diferente informacion del directorio como: la ruta, el numero de archivos, 
+        // el numero de directorios, y los permisos del directorio en el que estamos.
+        //-------------------------------------------------------------------------------------------
+
+int comprobarstoycommand() {
+
+    // Declaraciones de variables
+    struct dirent *entry;
+    struct stat info;
+    FILE *fp;
+    DIR *dir;
+    int contador = 0,contadorDir=0;
+    char path[MAX_LINE];
+    char permisos[10];
+
+    // Abrir un proceso para ejecutar el comando "pwd" y leer su salida
+    fp = popen("pwd", "r");
+    if (fp == NULL) {
+        perror("Error al ejecutar popen");
+        return 1; // Retorna un codigo de error
+    }
+
+    // Leer el resultado del comando y almacenarlo en la variable path
+    if (fgets(path, sizeof(path), fp) != NULL) {
+        // Eliminar el salto de línea del final, si está presente
+        size_t length = strlen(path);
+        if (length > 0 && path[length - 1] == '\n') {
+            path[length - 1] = '\0';
+        }
+
+        // Abrir el directorio actual
+        dir = opendir(path);
+        if (dir == NULL) {
+            perror("Error al abrir el directorio");
+            exit(EXIT_FAILURE);
+        }   
+
+        // Contar archivos y directorios en el directorio
+        while ((entry = readdir(dir)) != NULL) {
+
+            // Cuenta los archivos del directorio
+            if (entry->d_type == DT_REG) {  
+                contador++;
+            }
+
+            // Cuenta los directorios dentro del que estamos, excluyendo "." y ".."
+            if (entry->d_type == DT_DIR  && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+                contadorDir++;
+            }
+    }
+    
+
+    // Obtiene los permisos sobre el directorio
+    if (stat(path, &info) == 0) {
+        // Convierte los bits de permisos a una cadena
+        snprintf(permisos, 10, "%o", info.st_mode & 0777);
+    } else {
+
+        perror("Error al obtener información del directorio");
+        exit(EXIT_FAILURE);
+    }
+
+    // Cierra el directorio
+    closedir(dir);
+
+    // Imprimir información sobre el directorio
+     printf("Ruta actual: %s\nAchivos: %d\nDirectorios: %d\nPermisos: %s\n", path,contador,contadorDir,permisos);
+
+    } else {
+
+        perror("Error al leer la salida de popen");
+        return 1;
+    }
+
+    // Cerrar el flujo del proceso
+    if (pclose(fp) == -1) {
+        perror("Error al cerrar popen");
+        return 1;
+    }
+
+    return 3; // Se termina el test con Exito.
 }
 
 // Esta función toma un comando como entrada y ejecuta ese comando en un proceso hijo
@@ -34,7 +120,12 @@ int ejecutarComando(char* comando) {
     if (strcmp(comando, "cpu10") == 0){
         
         return comprobarcpucommand(comando);
+
+    }else if (strcmp(comando, "stoy") == 0){
+        
+        return comprobarstoycommand(comando);
     }
+
     // Crea un nuevo proceso hijo utilizando fork() y almacena el resultado en pid
     pid_t pid = fork();
 
@@ -81,7 +172,7 @@ int ejecutarComando(char* comando) {
 int main() {
 
     // guardamos nuestro comando en un array de caracteres, y posteriormente se lo pasamos al metodo ejecutarComando().
-    char comando[] = "cpu10";
+    char comando[] = "stoy";
     int resultado = ejecutarComando(comando);
     //int resultado2 = ejecutarComandoPersonalizado()
 
@@ -90,10 +181,14 @@ int main() {
         printf("Prueba 1: Pasada - El comando 'ls' se ejecutó correctamente.\n");
     } else if(resultado == 1){
 
-        printf("Prueba 1: Fallida - Error al ejecutar el comando 'ls'.\n");
+        printf("Prueba: Fallida - Error al ejecutar el comando.\n");
     }else if(resultado == 2){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
 
         printf("Prueba 2: Pasada - El comando 'cpu10' se ejecutó correctamente.\n");
+    }else if(resultado == 3){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
+
+        printf("Prueba 3: Pasada - El comando 'stoy' se ejecutó correctamente.\n");
     }
     return 0;
 }
+
