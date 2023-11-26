@@ -15,16 +15,25 @@
         // Para salir del proceso, se usara ctrl + C, si nos sale el mensaje 'Prueba 2: Pasada' significa que el test se ha realizado correctamente.
         //-------------------------------------------------------------------------------------------
 
-int comprobarcpucommand(char* comando) {
+int comprobarcpucommand() {
 
     printf("Va a dejar la ventana actual (Para salir presione ctrl + C), presiona enter.....");
     fflush(stdout); // Asegura que el mensaje se imprima antes de la pausa
     getchar();
+    pid_t pid = fork();
+    int pidhijo;
+    if(pid == 0){
+        pidhijo= (int) getpid();
+        char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";// Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
         
-    char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";// Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
-        
-    system(newComandoCpu);// se ejecuta el comando
-
+        system(newComandoCpu);// se ejecuta el comando
+    }else if (pid<0){
+        printf("Error al crear el proceso hijo del comando cpu.");
+        return -1;
+    }else{
+        printf("se ha pasado al proceso padre del comando cpu.");
+        wait(NULL);
+    }
     return 2;
 }
 
@@ -113,58 +122,85 @@ int comprobarstoycommand() {
     return 3; // Se termina el test con Exito.
 }
 
+        //-------------------------------------------------------------------------------------------
+        // MODIFICACION 3 -> Añadimos un metodo para contar las palabras del comando, 
+        // y lo usamos en el metodo ejecutarComando para checkear que el comando solo tenga 1 palabra.
+        //-------------------------------------------------------------------------------------------
+    
+
+// Utilizamos esta funcion para contar el numero de palabras que tiene un comando.
+int contarComando(char* comando){
+    int contador = 0;
+
+    // Divide el comando en diferentes tokens, los cuales usaremos para contar las palabras.
+    const char *token = strtok((char *)comando, " ");
+    while (token != NULL) {
+        contador++;
+        token = strtok(NULL, " ");
+    }
+
+    return contador;
+}
+
 // Esta función toma un comando como entrada y ejecuta ese comando en un proceso hijo
 int ejecutarComando(char* comando) {
 
+    if(contarComando(comando)>=2){ return 4;} // comprobamos que los comandos que metamos, tengan la longitud que queremos.
+
+        // He añadido estas lineas, para restringir el test a los comandos especificos, ahora mismo solo reconocera "ls,cpu y stoy".
+        // Para comprovar si los comandos son los que queremos, utilizaremos la funcion strcmp().
+        if (strcmp(comando, "cpu") == 0 && contarComando(comando)>=2){
+        
+            return comprobarcpucommand();
+
+        }else if (strcmp(comando, "stoy" ) == 0 && contarComando(comando)>=2){
+        
+            return comprobarstoycommand();
+        }else if(strcmp(comando, "ls") != 0){ 
+            return 1;
+        } 
     
-    if (strcmp(comando, "cpu10") == 0){
-        
-        return comprobarcpucommand(comando);
+        // Crea un nuevo proceso hijo utilizando fork() y almacena el resultado en pid
+        pid_t pid = fork();
 
-    }else if (strcmp(comando, "stoy") == 0){
-        
-        return comprobarstoycommand(comando);
-    }
+        // Si el pid es 0, el codigo dentro de este bloque se ejecuta en el proceso hijo.
+        if (pid == 0) {
 
-    // Crea un nuevo proceso hijo utilizando fork() y almacena el resultado en pid
-    pid_t pid = fork();
+            // Array de punteros para almacenar los tokens del comando 
+            //(token -> tokens son las palabras individuales que resultan de dividir la cadena de comando utilizando un delimitador (en este caso, el espacio en blanco)).
+            char *args[MAX_LINE / 2 + 1];
 
-    // Si el pid es 0, el codigo dentro de este bloque se ejecuta en el proceso hijo.
-    if (pid == 0) {
+            // Inicialización del *token con el primer token de la cadena de comando.
+            char *token = strtok(comando, " ");
 
-        // Array de punteros para almacenar los tokens del comando 
-        //(token -> tokens son las palabras individuales que resultan de dividir la cadena de comando utilizando un delimitador (en este caso, el espacio en blanco)).
-        char *args[MAX_LINE / 2 + 1];
+            // Bucle para dividir la cadena de comando en tokens y almacenarlos en args.
+            int i = 0;
+            while (token != NULL) {
+                args[i] = token;
+                token = strtok(NULL, " ");
+                i++;
+            }
 
-        // Inicialización del *token con el primer token de la cadena de comando.
-        char *token = strtok(comando, " ");
+            // Se asigna NULL al siguiente elemento del array args(comun en la ejecucion de comandos).
+            args[i] = NULL;
 
-        // Bucle para dividir la cadena de comando en tokens y almacenarlos en args.
-        int i = 0;
-        while (token != NULL) {
-            args[i] = token;
-            token = strtok(NULL, " ");
-            i++;
-        }
+            // Se utiliza execvp para reemplazar la imagen del proceso actual con el comando especificado.
+            execvp(args[0], args);
 
-        // Se asigna NULL al siguiente elemento del array args(comun en la ejecucion de comandos).
-        args[i] = NULL;
-
-        // Se utiliza execvp para reemplazar la imagen del proceso actual con el comando especificado.
-        execvp(args[0], args);
-
-        // Si el proceso execvp falla, el programa hijo termina automaticamente como un exito.
-        exit(0);
+            // Si el proceso execvp falla, el programa hijo termina automaticamente como un exito.
+            exit(1);
 
         // El padre espera a que el proceso hijo termine mediante wait.
-    } else if (pid > 0) {
-        wait(NULL);
-    } else {
-        // Error al crear el proceso hijo.
-        return -1; 
-    }
+        } else if (pid > 0) {
+            wait(NULL);
+            return 0;
+        } else {
+            // Error al crear el proceso hijo.
+            return -1; 
+        }
+    
 
-    // Exito
+   
     return 0; 
 }
 
@@ -172,23 +208,25 @@ int ejecutarComando(char* comando) {
 int main() {
 
     // guardamos nuestro comando en un array de caracteres, y posteriormente se lo pasamos al metodo ejecutarComando().
-    char comando[] = "stoy";
+    char comando[] = "stoys";
     int resultado = ejecutarComando(comando);
     //int resultado2 = ejecutarComandoPersonalizado()
 
+    
     // Imprime el resultado de la ejecucion del comando "ls" si la funcion ejecutarComando devuelve 0.
     if (resultado == 0) {
         printf("Prueba 1: Pasada - El comando 'ls' se ejecutó correctamente.\n");
     } else if(resultado == 1){
 
-        printf("Prueba: Fallida - Error al ejecutar el comando.\n");
+        printf("Fallo 1 - Error al ejecutar el comando.\n");
     }else if(resultado == 2){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
 
         printf("Prueba 2: Pasada - El comando 'cpu10' se ejecutó correctamente.\n");
     }else if(resultado == 3){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
 
         printf("Prueba 3: Pasada - El comando 'stoy' se ejecutó correctamente.\n");
+    }else if (resultado == 4){
+        printf("Fallo 2 - El comando tiene demasiadas palabras.\n");
     }
     return 0;
 }
-
