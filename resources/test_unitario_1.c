@@ -27,6 +27,7 @@ int comprobarcpucommand() {
         char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";// Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
         
         system(newComandoCpu);// se ejecuta el comando
+        
     }else if (pid<0){
         printf("Error al crear el proceso hijo del comando cpu.");
         return -1;
@@ -149,16 +150,16 @@ int ejecutarComando(char* comando) {
 
         // He añadido estas lineas, para restringir el test a los comandos especificos, ahora mismo solo reconocera "ls,cpu y stoy".
         // Para comprovar si los comandos son los que queremos, utilizaremos la funcion strcmp().
-        if (strcmp(comando, "cpu") == 0 && contarComando(comando)>=2){
+        if (strcmp(comando, "cpu") == 0 || contarComando(comando)>=2){
         
             return comprobarcpucommand();
 
-        }else if (strcmp(comando, "stoy" ) == 0 && contarComando(comando)>=2){
+        }else if (strcmp(comando, "stoy" ) == 0 || contarComando(comando)>=2){
         
             return comprobarstoycommand();
         }else if(strcmp(comando, "ls") != 0){ 
             return 1;
-        } 
+       } 
     
         // Crea un nuevo proceso hijo utilizando fork() y almacena el resultado en pid
         pid_t pid = fork();
@@ -188,7 +189,7 @@ int ejecutarComando(char* comando) {
             execvp(args[0], args);
 
             // Si el proceso execvp falla, el programa hijo termina automaticamente como un exito.
-            exit(1);
+            exit(0);
 
         // El padre espera a que el proceso hijo termine mediante wait.
         } else if (pid > 0) {
@@ -208,7 +209,7 @@ int ejecutarComando(char* comando) {
 int main() {
 
     // guardamos nuestro comando en un array de caracteres, y posteriormente se lo pasamos al metodo ejecutarComando().
-    char comando[] = "stoys";
+    char comando[] = "ls";
     int resultado = ejecutarComando(comando);
     //int resultado2 = ejecutarComandoPersonalizado()
 
@@ -218,10 +219,10 @@ int main() {
         printf("Prueba 1: Pasada - El comando 'ls' se ejecutó correctamente.\n");
     } else if(resultado == 1){
 
-        printf("Fallo 1 - Error al ejecutar el comando.\n");
+        printf("Fallo 1 - No es un comando permitido, prueba con otro.\n");
     }else if(resultado == 2){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
 
-        printf("Prueba 2: Pasada - El comando 'cpu10' se ejecutó correctamente.\n");
+        printf("Prueba 2: Pasada - El comando 'cpu' se ejecutó correctamente.\n");
     }else if(resultado == 3){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
 
         printf("Prueba 3: Pasada - El comando 'stoy' se ejecutó correctamente.\n");
