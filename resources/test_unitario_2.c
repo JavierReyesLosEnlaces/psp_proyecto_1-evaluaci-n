@@ -8,11 +8,81 @@
 #define MAX_LINE 80
 char *args[MAX_LINE / 2 + 1];
 
+int buscarPalabra(char *comando)
+
+{
+    // Comprobar que el comando está correctamente formado
+    int i = 0;
+    pid_t pid;
+    char *cmd = NULL, *directorio = NULL, *palabra = NULL; // SMI-> SE TIENE QUE INICIALIZAR A 0 PORQUE C POR DEFECTO HACE LO QUE LE SALE DEL MOÑO
+
+    const char *pch = strtok((char *)comando, " "); // Dividir *comando por espacios en blanco
+
+    while (pch != NULL)
+    {
+        if (i == 0)
+        { // Asignar los valores que se han obtenido de divir el array
+            cmd = pch;
+        }
+        else if (i == 1)
+        {
+            palabra = pch;
+        }
+        else if (i == 2)
+        {
+            printf("AAAAAAAAA\n");
+            directorio = pch;
+        }
+        pch = strtok(NULL, " ");
+        i++;
+    }
+    if (strcmp("buscar", cmd) != 0)
+    { // comprobamos que es el comando correcto
+        return -1;
+    }
+    if (i > 3)
+    {
+        return -127;
+    }
+    // No se ha introducido una palabra a buscar
+
+    if (!palabra)
+    {
+        return -126;
+    }
+
+    if (!directorio)
+    {
+        return -128;
+    }
+
+    // Ejecutamos el comando con las instrucciones en un proceso hijo
+
+    char *comandoGrep = "grep";
+    char *lista_argumentos[] = {comandoGrep, "-rni", palabra, directorio, NULL};
+    pid = fork();
+    if (pid == 0)
+    {
+        printf("Es la hora del kk %s, %s\n", palabra, directorio);
+        int status_code = execvp(comandoGrep, lista_argumentos);
+        return EXIT_SUCCESS;
+    }
+    else if (pid > 0)
+    {
+        wait(NULL);
+        return EXIT_SUCCESS;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
 int ejecutarComando(char *comando)
 {
     pid_t pid = fork();
     int status_code = 100;
-    //proceso hijo
+    // proceso hijo
     if (pid == 0)
     {
         char *token = strtok(comando, " ");
@@ -26,55 +96,66 @@ int ejecutarComando(char *comando)
         }
         args[i] = NULL;
 
-//PRIMERA MODIFICACION ->
+        // 1. MODIFICACION ->
 
         int commad_status_code = execvp(args[0], args);
-        /*since you want to return errno to parent
-                            do a simple exit call with the errno*/
+        // Si execvp funciona, no se escribe lo demás a partir de aquí
         printf("ESTO SOLO SALDRA SI EL COMANDO INTRODUCIDO NO EXISTE, joder\n");
-        exit(commad_status_code);
-     
+        exit(commad_status_code); //
     }
     else if (pid > 0)
     {
 
-        //SEGUNDA MODIFICACION ->
+        // esperamos al proceso hijo a que acabe para asi comprobar la respuesta del comando (osea su status code)
+        waitpid(pid, &status_code, 0);
 
-        //esperamos al proceso hijo a que acabe para asi comprobar la respuesta del comando (osea su status code)
-        waitpid(pid, &status_code,0);
-        // if (status_code == EXIT_SUCCESS) {
-        //     return EX
-        // }
-        if (status_code == 0){
+        if (status_code == 0)
+        {
             return EXIT_SUCCESS;
-        }else {
+        }
+        else
+        {
             return EXIT_FAILURE;
         }
-        //devolvemos el status code del proceso hijo que ha ejecutado el comando
+        // devolvemos el status code del proceso hijo que ha ejecutado el comando
         return status_code;
         // wait(NULL);
-        //return EXIT_SUCCESS;
-
-    }else {
-        //fallo al crear el proceso hijo
+        // return EXIT_SUCCESS;
+    }
+    else
+    {
+        // fallo al crear el proceso hijo
         return -1;
     }
 
- // falta comentar todos los cambios y explicar de nuevo el funcionamiento
+    // TO DO: falta comentar todos los cambios y explicar de nuevo el funcionamiento
 }
 
 int main()
 {
-    char comando_inexistente[] = "sdsd";
+    char comando_inexistente[] = "ls";
     int resultado = ejecutarComando(comando_inexistente);
 
     if (resultado == EXIT_SUCCESS)
     {
-        printf("Prueba 2: Fallida - el comando existe.\n"); //Modificacion de los textos para dejarlos más claros
+        printf("Prueba 2: Fallida - el comando existe.\n"); // Modificacion de los textos para dejarlos más claros
     }
     else if (resultado == EXIT_FAILURE)
     {
         printf("Prueba 2: Pasada - El comando inexistente no se ha encontrado.\n");
+    }
+
+    char comando[] = "buscar Prueba /home/alumno"; // indicamos el comando, la palabra y el directorio
+    
+    int resultadoVis = buscarPalabra(comando);
+
+    if (resultadoVis == EXIT_SUCCESS)
+    {
+        printf("Prueba 3: Exito - se ha ejecutado correctamente. \n");
+    }
+    else
+    {
+        printf("Prueba 3: Fallo - no se ha ejecutado correctamente. \n");
     }
 
     return 0;
