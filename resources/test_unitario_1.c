@@ -18,13 +18,17 @@
 int comprobarcpucommand() {
 
     printf("Va a dejar la ventana actual (Para salir presione ctrl + C), presiona enter.....");
-    fflush(stdout); // Asegura que el mensaje se imprima antes de la pausa
+
+    // Asegura que el mensaje se imprima antes de la pausa
+    fflush(stdout); 
     getchar();
     pid_t pid = fork();
     int pidhijo;
     if(pid == 0){
         pidhijo= (int) getpid();
-        char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";// Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
+
+        // Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
+        char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";
         
         system(newComandoCpu);// se ejecuta el comando
         
@@ -59,7 +63,9 @@ int comprobarstoycommand() {
     fp = popen("pwd", "r");
     if (fp == NULL) {
         perror("Error al ejecutar popen");
-        return 1; // Retorna un codigo de error
+
+        // Retorna un codigo de error
+        return 1; 
     }
 
     // Leer el resultado del comando y almacenarlo en la variable path
@@ -120,7 +126,8 @@ int comprobarstoycommand() {
         return 1;
     }
 
-    return 3; // Se termina el test con Exito.
+    // Se termina el test con Exito.
+    return 3; 
 }
 
         //-------------------------------------------------------------------------------------------
@@ -146,7 +153,8 @@ int contarComando(char* comando){
 // Esta función toma un comando como entrada y ejecuta ese comando en un proceso hijo
 int ejecutarComando(char* comando) {
 
-    if(contarComando(comando)>=2){ return 4;} // comprobamos que los comandos que metamos, tengan la longitud que queremos.
+    // comprobamos que los comandos que metamos, tengan la longitud que queremos.
+    if(contarComando(comando)>=2){ return 4;} 
 
         // He añadido estas lineas, para restringir el test a los comandos especificos, ahora mismo solo reconocera "ls,cpu y stoy".
         // Para comprovar si los comandos son los que queremos, utilizaremos la funcion strcmp().
@@ -220,10 +228,14 @@ int main() {
     } else if(resultado == 1){
 
         printf("Fallo 1 - No es un comando permitido, prueba con otro.\n");
-    }else if(resultado == 2){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
+
+    // comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
+    }else if(resultado == 2){
 
         printf("Prueba 2: Pasada - El comando 'cpu' se ejecutó correctamente.\n");
-    }else if(resultado == 3){// comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
+
+    // comprobamos si el resultado es 2, en tal caso quiere decir que nuestra prueba de comando cpu10 se ha efectuado correctamente.
+    }else if(resultado == 3){
 
         printf("Prueba 3: Pasada - El comando 'stoy' se ejecutó correctamente.\n");
     }else if (resultado == 4){
