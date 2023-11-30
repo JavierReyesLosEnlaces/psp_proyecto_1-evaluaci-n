@@ -4,9 +4,51 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 #define MAX_LINE 80
 char *args[MAX_LINE / 2 + 1];
+
+//TODO: comentar todo el codigo y que hace y las moficaciones
+
+int esFichero(char* ruta){
+
+    struct stat path_stat;
+    stat(ruta, &path_stat);
+    return  S_ISREG(path_stat.st_mode);
+}
+
+int reemplazar(char* buscar, char* reemplazo, char* ruta){
+
+    //TODO: falta hacer comprobaciones de que los valores no sean nulos
+    // TODO: comprobar que se tienen permisos sobre el archivo
+
+
+    int resultado = esFichero(ruta);
+    if (resultado == 0)
+    {
+        return EXIT_FAILURE;
+    }
+
+    FILE *file = fopen(ruta, "r+");
+    if (file == NULL) {
+        return -1;
+    }
+
+    char palabra_fichero[100]; // Tamaño suficiente para almacenar una palabra del archivo
+
+    while (fscanf(file, "%s", palabra_fichero) != EOF) {
+        if (strcmp(palabra_fichero, buscar) == 0) {
+            fseek(file, -strlen(buscar), SEEK_CUR);
+            fprintf(file, "%s",reemplazo );
+        }
+    }
+    fclose(file);
+    return 0;
+ 
+}
 
 int buscarPalabra(char *comando)
 
@@ -157,6 +199,19 @@ int main()
     {
         printf("Prueba 3: Fallo - no se ha ejecutado correctamente. \n");
     }
+    
+//test para el programa de buscar 
+    char ruta []= "/home/alumno/prueba.txt";
+    int resultado =  reemplazar("patacas", "gatetes", ruta);
+    if (resultado == 0){
+        printf("TODO OK\n");
+    }
+    else {
+        printf("NO TODO OK\n");
+    } 
+
+
+    
 
     return 0;
 }
