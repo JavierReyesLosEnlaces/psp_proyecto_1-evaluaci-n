@@ -1,14 +1,17 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <time.h> 
+#include <stdio.h> //Para las funciones de entrada/salida estandar.
+#include <stdlib.h> // Para funciones relacionadas con la gestion de memoria y otras utilidades.
+#include <string.h> // Para funciones de manipulacion de cadenas de caracteres.
+#include <unistd.h> // Para la funcion fork y otras llamadas al sistema.
+#include <sys/types.h> // Para tipos de datos relacionados con llamadas al sistema.
+#include <sys/wait.h> // Para la funcion wait y macros relacionadas.
+#include <time.h> // Para las funciones de manipulación de fecha y hora
 
-#define MAX_LINE 80 /* Constante llamada "MAX_LINE" que define la longitud máxima del comando */
+// Longitud máxima del comando 
+#define MAX_LINE 80
+// Tamaño del array de cadenas para el historial de comandos 
 #define HISTORY_SIZE 100
 
+// Esta función permite listar los cinco primeros procesos que se encuentren en ejecución junto 
 void cincoPrimerosProcesos();
 void mostrarHistorial();
 void loadingBar();
