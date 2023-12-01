@@ -37,8 +37,8 @@ int main() {
     // Utilizamos estos 6 comandos, para comprobar los test unitarios que hemos implementado, 
     // primero los ejecutaremos (si podemos ejecutarlos), y luego comprobaremos si han pasado los test.
 
-    char comando[] = "ls";
     printf("*****************************************\n");
+    char comando[] = "ls";
     int resultado1 = ejecutarComando(comando);
     
     printf("*****************************************\n");
@@ -203,7 +203,7 @@ int contarComando(char* comando){
     int contador = 0;
 
     // Divide el comando en diferentes tokens, los cuales usaremos para contar las palabras.
-    const char *token = strtok((char *)comando, " ");
+    const char *token = strtok(comando, " ");
     while (token != NULL) {
         contador++;
         token = strtok(NULL, " ");
@@ -222,7 +222,7 @@ int comprobarpwdcount(){
 
     FILE *fp;
     char path[MAX_LINE];
-    int contadorPalb = -1;
+    int contadorPalb = 0;
 
     // Abrir un proceso para ejecutar el comando "pwd" y leer su salida
     fp = popen("pwd", "r");
@@ -247,11 +247,7 @@ int comprobarpwdcount(){
                 // Contar '/' como separador de palabras
                 ++contadorPalb;
             }
-        }
-
-        // Incrementar el recuento final, ya que la última palabra no tiene '/'
-        ++contadorPalb;
-      
+        }     
     }
 
     // Cerrar el archivo después de su uso
