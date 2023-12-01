@@ -32,12 +32,10 @@ int ejecutarComando(char* comando);
 void testearComando(int resultado);
 
 
-
 int main() {
 
     // Utilizamos estos 6 comandos, para comprobar los test unitarios que hemos implementado, 
     // primero los ejecutaremos (si podemos ejecutarlos), y luego comprobaremos si han pasado los test.
-
 
     char comando[] = "ls";
     printf("*****************************************\n");
@@ -72,15 +70,11 @@ int main() {
     testearComando(resultado6);
     printf("---------------------------------------\n");
 
-    
-    
     return 0;
 }
 
-
-
         //-------------------------------------------------------------------------------------------
-        //MODIFICACION 1 -> Comprobamos si el comando ejecutado es cpu10, dentro del metodo ejecutarComando(),
+        // MODIFICACION 1 -> Comprobamos si el comando ejecutado es cpu10, dentro del metodo ejecutarComando(),
         // si lo es, se ejecutara un metodo el cual se llama comprobarcpucommand() y ejecuta un comando para ver cada 3 segundos,los 10 procesos que mas cpu consumen.
         // Para salir del proceso, se usara ctrl + C, si nos sale el mensaje 'Prueba 2: Pasada' significa que el test se ha realizado correctamente.
         //-------------------------------------------------------------------------------------------
@@ -113,7 +107,7 @@ int comprobarcpucommand() {
 }
 
         //-------------------------------------------------------------------------------------------
-        //MODIFICACION 2 -> Usamos este metodo, para manejar la informacion de nuestro directorio, 
+        // MODIFICACION 2 -> Usamos este metodo, para manejar la informacion de nuestro directorio, 
         // con el mostramos diferente informacion del directorio como: la ruta, el numero de archivos, 
         // el numero de directorios, y los permisos del directorio en el que estamos.
         //-------------------------------------------------------------------------------------------
@@ -166,7 +160,6 @@ int comprobarstoycommand() {
                 contadorDir++;
             }
     }
-    
 
     // Obtiene los permisos sobre el directorio
     if (stat(path, &info) == 0) {
@@ -206,6 +199,7 @@ int comprobarstoycommand() {
         //-------------------------------------------------------------------------------------------
     
 int contarComando(char* comando){
+
     int contador = 0;
 
     // Divide el comando en diferentes tokens, los cuales usaremos para contar las palabras.
@@ -257,8 +251,7 @@ int comprobarpwdcount(){
 
         // Incrementar el recuento final, ya que la última palabra no tiene '/'
         ++contadorPalb;
-
-        
+      
     }
 
     // Cerrar el archivo después de su uso
@@ -270,9 +263,7 @@ int comprobarpwdcount(){
         return 5;
     }else{
         return 6;
-    }
-
-    
+    }   
 }
 
 // Esta función toma un comando como entrada y ejecuta ese comando en un proceso hijo
@@ -306,7 +297,7 @@ int ejecutarComando(char* comando) {
         if (pid == 0) {
 
             // Array de punteros para almacenar los tokens del comando 
-            //(token -> tokens son las palabras individuales que resultan de dividir la cadena de comando utilizando un delimitador (en este caso, el espacio en blanco)).
+            // (token -> tokens son las palabras individuales que resultan de dividir la cadena de comando utilizando un delimitador (en este caso, el espacio en blanco)).
             char *args[MAX_LINE / 2 + 1];
 
             // Inicialización del *token con el primer token de la cadena de comando.
@@ -338,8 +329,6 @@ int ejecutarComando(char* comando) {
             return -1; 
         }
     
-
-   
     return 0; 
 }
 
