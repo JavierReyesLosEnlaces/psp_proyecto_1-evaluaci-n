@@ -1,40 +1,40 @@
-#include <stdio.h>//Para las funciones de entrada/salida estandar.
-#include <stdlib.h>// Para funciones relacionadas con la gestion de memoria y otras utilidades.
-#include <string.h>// Para funciones de manipulacion de cadenas de caracteres.
-#include <unistd.h>// Para la funcion fork y otras llamadas al sistema.
-#include <sys/types.h>// Para tipos de datos relacionados con llamadas al sistema.
-#include <sys/wait.h>// Para la funcion wait y macros relacionadas.
-#include <dirent.h> // Para manejar operaciones de directorios (abrir, leer, cerrar).
-#include <sys/stat.h> // Para obtener información sobre archivos y directorios
+#include <stdio.h>      // Para las funciones de entrada/salida estándar.
+#include <stdlib.h>     // Para funciones relacionadas con la gestión de memoria y otras utilidades.
+#include <string.h>     // Para funciones de manipulación de cadenas de caracteres.
+#include <unistd.h>     // Para la función fork y otras llamadas al sistema.
+#include <sys/types.h>  // Para tipos de datos relacionados con llamadas al sistema.
+#include <sys/wait.h>   // Para la función wait y macros relacionadas.
+#include <dirent.h>     // Para manejar operaciones de directorios (abrir, leer, cerrar).
+#include <sys/stat.h>   // Para obtener información sobre archivos y directorios
             
-#define MAX_LINE 80// constante que representa la longitud maxima de la linea de comando.
+#define MAX_LINE 80     // Constante que representa la longitud máxima de la línea de comando.
 
 
-// Se usa para ejecutar un proceso, que muestra los 10 procesos que mas cpu consumen, junto con ciertos datos interesantes de estos y del mismo sistema.
+// Se usa para ejecutar un proceso, que muestra los 10 procesos que más cpu consumen, junto con ciertos datos interesantes de estos y del mismo sistema.
 int comprobarcpucommand();
 
-// Este proceso se encarga de devolver: el path en el que nos encontramos, el numero de archivos en el directorio actual,
-// el numero de directorios en el directorio actual, y los permisos del usuario actual sobre el directorio actual. 
+// Este proceso se encarga de devolver: el path en el que nos encontramos, el número de archivos en el directorio actual,
+// el número de directorios en el directorio actual, y los permisos del usuario actual sobre el directorio actual.
 int comprobarstoycommand(); 
 
-// Utilizamos esta funcion para contar el numero de palabras que tiene un comando.
+// Utilizamos esta función para contar el número de palabras que tiene un comando.
 int contarComando(char* comando);
 
-// Utilizamos esta funcion para contar el numero de palabras que tiene el path en el que nos encontramos, exclullendo las "/",
-// si el path contiene 5 o mas palabras, devuelve un resultado, si no devuelve otro.
+// Utilizamos esta función para contar el número de palabras que tiene el path en el que nos encontramos, excluyendo las "/",
+// si el path contiene 5 o más palabras, devuelve un resultado, si no devuelve otro.
 int comprobarpwdcount();
 
-// Utilizamos esta funcion para comprobar que comando le estamos mandando al programa para ejecutar, si tiene mas de 2 palabras retornara un valor de error
-// , si el comando difiere de "ls,cpu,stoy y pwd" retornara otro valor de error diferente, si es uno de los comandos anteriores, los ejecutara.
+// Utilizamos esta función para comprobar qué comando le estamos mandando al programa para ejecutar, si tiene más de 2 palabras retorna un valor de error,
+// si el comando difiere de "ls,cpu,stoy y pwd" retorna otro valor de error diferente, si es uno de los comandos anteriores, los ejecutará.
 int ejecutarComando(char* comando);
 
-// Se utiliza para testear el valor del comando introducido, y dependiendo del valor de este resultado, mostrara un mensaje de testeo pasado o no.
+// Se utiliza para testear el valor del comando introducido, y dependiendo del valor de este resultado, mostrará un mensaje de testeo pasado o no.
 void testearComando(int resultado);
 
 
 int main() {
 
-    // Utilizamos estos 6 comandos, para comprobar los test unitarios que hemos implementado, 
+    // Utilizamos estos 6 comandos, para comprobar los test unitarios que hemos implementado,
     // primero los ejecutaremos (si podemos ejecutarlos), y luego comprobaremos si han pasado los test.
 
     printf("*****************************************\n");
@@ -74,9 +74,10 @@ int main() {
 }
 
         //-------------------------------------------------------------------------------------------
-        // MODIFICACION 1 -> Comprobamos si el comando ejecutado es cpu10, dentro del metodo ejecutarComando(),
-        // si lo es, se ejecutara un metodo el cual se llama comprobarcpucommand() y ejecuta un comando para ver cada 3 segundos,los 10 procesos que mas cpu consumen.
-        // Para salir del proceso, se usara ctrl + C, si nos sale el mensaje 'Prueba 2: Pasada' significa que el test se ha realizado correctamente.
+        // MODIFICACION 1 -> Comprobamos si el comando ejecutado es cpu10, dentro del método ejecutarComando(),
+        // si lo es, se ejecutará un método llamado comprobarcpucommand() y ejecutará un comando para ver cada 3 segundos,
+        // los 10 procesos que más CPU consumen. Para salir del proceso, se usará ctrl + C, si nos sale el mensaje
+        // 'Prueba 2: Pasada' significa que el test se ha realizado correctamente.
         //-------------------------------------------------------------------------------------------
 
 int comprobarcpucommand() {
@@ -91,7 +92,7 @@ int comprobarcpucommand() {
     if(pid == 0){
         pidhijo= (int) getpid();
 
-        // Con este comando conseguimos mostrar una pequeña lista de 10 procesos que mas cpu consumen, esta se refrescara cada 3 segundos
+        // Con este comando conseguimos mostrar una pequeña lista de 10 procesos que más CPU consumen, esta se refrescará cada 3 segundos
         char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";
         
         system(newComandoCpu);// se ejecuta el comando
@@ -107,9 +108,9 @@ int comprobarcpucommand() {
 }
 
         //-------------------------------------------------------------------------------------------
-        // MODIFICACION 2 -> Usamos este metodo, para manejar la informacion de nuestro directorio, 
-        // con el mostramos diferente informacion del directorio como: la ruta, el numero de archivos, 
-        // el numero de directorios, y los permisos del directorio en el que estamos.
+        // MODIFICACION 2 -> Usamos este método para manejar la información de nuestro directorio,
+        // con él mostramos diferente información del directorio como: la ruta, el número de archivos,
+        // el número de directorios y los permisos del directorio en el que estamos.
         //-------------------------------------------------------------------------------------------
 
 int comprobarstoycommand() {
@@ -128,7 +129,7 @@ int comprobarstoycommand() {
     if (fp == NULL) {
         perror("Error al ejecutar popen");
 
-        // Retorna un codigo de error
+        // Retorna un código de error
         return 1; 
     }
 
@@ -189,13 +190,13 @@ int comprobarstoycommand() {
         return 1;
     }
 
-    // Se termina el test con Exito.
+    // Se termina el test con Éxito.
     return 2; 
 }
 
         //-------------------------------------------------------------------------------------------
-        // MODIFICACION 3 -> Añadimos un metodo para contar las palabras del comando, 
-        // y lo usamos en el metodo ejecutarComando para checkear que el comando solo tenga 1 palabra.
+        // MODIFICACION 3 -> Añadimos un método para contar las palabras del comando,
+        // y lo usamos en el método ejecutarComando para verificar que el comando solo tenga 1 palabra.
         //-------------------------------------------------------------------------------------------
     
 int contarComando(char* comando){
@@ -212,11 +213,11 @@ int contarComando(char* comando){
     return contador;
 }
 
-        //-------------------------------------------------------------------------------------------------
-        // MODIFICACION 4 -> Una vez ejecutamos el comando pwd, comprobamos la cantidad de palabras 
-        // que contiene el path del directorio en el que estamos, si la cantidad de palabras es 5 o mayor 
+        //-------------------------------------------------------------------------------------------
+        // MODIFICACION 4 -> Una vez ejecutamos el comando pwd, comprobamos la cantidad de palabras
+        // que contiene el path del directorio en el que estamos, si la cantidad de palabras es 5 o mayor
         // se da por pasado el test, si es menor, el test falla.
-        //-------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------
 
 int comprobarpwdcount(){
 
@@ -254,7 +255,7 @@ int comprobarpwdcount(){
     pclose(fp);
     printf("Número de palabras en el path: %d\n", contadorPalb);
 
-    // comprobamos si el contador es masyor de 5 o no.
+    // Comprobamos si el contador es masyor de 5 o no.
     if (contadorPalb>=5){
         return 5;
     }else{
@@ -265,11 +266,11 @@ int comprobarpwdcount(){
 // Esta función toma un comando como entrada y ejecuta ese comando en un proceso hijo
 int ejecutarComando(char* comando) {
 
-    // comprobamos que los comandos que metamos, tengan la longitud que queremos.
+    // Comprobamos que los comandos que metamos, tengan la longitud que queremos.
     if(contarComando(comando)>=2){ return 4;} 
 
-        // He añadido estas lineas, para restringir el test a los comandos especificos, ahora mismo solo reconocera "ls,cpu,stoy y pwd".
-        // Para comprovar si los comandos son los que queremos, utilizaremos la funcion strcmp().
+        // He añadido estas líneas, para restringir el test a los comandos específicos, ahora mismo solo reconocerá "ls,cpu,stoy y pwd".
+        // Para comprobar si los comandos son los que queremos, utilizaremos la función strcmp().
         if (strcmp(comando, "cpu") == 0 ){
         
             return comprobarcpucommand();
@@ -289,7 +290,7 @@ int ejecutarComando(char* comando) {
         // Crea un nuevo proceso hijo utilizando fork() y almacena el resultado en pid
         pid_t pid = fork();
 
-        // Si el pid es 0, el codigo dentro de este bloque se ejecuta en el proceso hijo.
+        // Si el pid es 0, el código dentro de este bloque se ejecuta en el proceso hijo.
         if (pid == 0) {
 
             // Array de punteros para almacenar los tokens del comando 
@@ -307,13 +308,13 @@ int ejecutarComando(char* comando) {
                 i++;
             }
 
-            // Se asigna NULL al siguiente elemento del array args(comun en la ejecucion de comandos).
+            // Se asigna NULL al siguiente elemento del array args (común en la ejecución de comandos).
             args[i] = NULL;
 
             // Se utiliza execvp para reemplazar la imagen del proceso actual con el comando especificado.
             execvp(args[0], args);
 
-            // Si el proceso execvp falla, el programa hijo termina automaticamente como un exito.
+            // Si el proceso execvp falla, el programa hijo termina automáticamente como un éxito.
             exit(0);
 
         // El padre espera a que el proceso hijo termine mediante wait.
@@ -330,7 +331,7 @@ int ejecutarComando(char* comando) {
 
 void testearComando(int resultado){
 
-    // Imprime el resultado de la ejecucion del comando "ls" si la funcion ejecutarComando devuelve 0.
+    // Imprime el resultado de la ejecución del comando "ls" si la función ejecutarComando devuelve 0.
     if (resultado == 0) {
         printf("Prueba 1: Pasada - El comando 'ls' se ejecutó correctamente.\n");
     
@@ -351,7 +352,7 @@ void testearComando(int resultado){
 
 
     // Comprobamos si el resultado es 1, en tal caso quiere decir que nuestra prueba no se ha efectuado correctamente, 
-    // el comando que se ha introducido ha sido erroneo.   
+    // el comando que se ha introducido ha sido erróneo. 
     if(resultado == 1){
         printf("Fallo 1 - No es un comando permitido, prueba con otro.\n");
     
