@@ -36,7 +36,6 @@ int main() {
 
     // Utilizamos estos 6 comandos, para comprobar los test unitarios que hemos implementado,
     // primero los ejecutaremos (si podemos ejecutarlos), y luego comprobaremos si han pasado los test.
-
     printf("*****************************************\n");
     char comando[] = "ls";
     int resultado1 = ejecutarComando(comando);
@@ -95,11 +94,12 @@ int comprobarcpucommand() {
         // Con este comando conseguimos mostrar una pequeña lista de 10 procesos que más CPU consumen, esta se refrescará cada 3 segundos
         char newComandoCpu[] = "watch -n 3 \'free; echo; uptime; echo; ps aux --sort=-%cpu | head -n 11; echo; who\'";
         
-        system(newComandoCpu);// se ejecuta el comando
+        // Se ejecuta el comando
+        system(newComandoCpu);
         
     }else if (pid<0){
         printf("Error al crear el proceso hijo del comando cpu.");
-        return -1;
+        return 8;
     }else{
         printf("se ha pasado al proceso padre del comando cpu.");
         wait(NULL);
@@ -130,11 +130,12 @@ int comprobarstoycommand() {
         perror("Error al ejecutar popen");
 
         // Retorna un código de error
-        return 1; 
+        return 7; 
     }
 
     // Leer el resultado del comando y almacenarlo en la variable path
     if (fgets(path, sizeof(path), fp) != NULL) {
+
         // Eliminar el salto de línea del final, si está presente
         size_t length = strlen(path);
         if (length > 0 && path[length - 1] == '\n') {
@@ -164,6 +165,7 @@ int comprobarstoycommand() {
 
     // Obtiene los permisos sobre el directorio
     if (stat(path, &info) == 0) {
+
         // Convierte los bits de permisos a una cadena
         snprintf(permisos, 10, "%o", info.st_mode & 0777);
     } else {
@@ -181,13 +183,13 @@ int comprobarstoycommand() {
     } else {
 
         perror("Error al leer la salida de popen");
-        return 1;
+        return 7;
     }
 
     // Cerrar el flujo del proceso
     if (pclose(fp) == -1) {
         perror("Error al cerrar popen");
-        return 1;
+        return 7;
     }
 
     // Se termina el test con Éxito.
@@ -235,6 +237,7 @@ int comprobarpwdcount(){
     }
 
     if (fgets(path, sizeof(path), fp) != NULL) {
+
         // Eliminar el salto de línea del final, si está presente
         size_t length = strlen(path);
         if (length > 0 && path[length - 1] == '\n') {
@@ -245,6 +248,7 @@ int comprobarpwdcount(){
         
         for (size_t i = 0; i < length; ++i) {
             if (path[i] == '/') {
+
                 // Contar '/' como separador de palabras
                 ++contadorPalb;
             }
@@ -269,7 +273,7 @@ int ejecutarComando(char* comando) {
     // Comprobamos que los comandos que metamos, tengan la longitud que queremos.
     if(contarComando(comando)>=2){ return 4;} 
 
-        // He añadido estas líneas, para restringir el test a los comandos específicos, ahora mismo solo reconocerá "ls,cpu,stoy y pwd".
+        // He añadido estas líneas, para restringir el test a los comandos específicos, ahora mismo solo reconocerá "ls, cpu, stoy y pwd".
         // Para comprobar si los comandos son los que queremos, utilizaremos la función strcmp().
         if (strcmp(comando, "cpu") == 0 ){
         
@@ -322,6 +326,7 @@ int ejecutarComando(char* comando) {
             wait(NULL);
             return 0;
         } else {
+            
             // Error al crear el proceso hijo.
             return -1; 
         }
@@ -366,6 +371,17 @@ void testearComando(int resultado){
     }else if (resultado == 6){
 
         printf("Fallo 3 - La ruta del archivo no tiene la longitud adecuada.\n");
+    // Comprobamos si el resultado es 7, en tal caso quiere decir que nuestra prueba no se ha efectuado correctamente,
+    // el comando stoy ha dado problemas a la hora de su ejecución.
+    }else if (resultado == 7){
+
+        printf("Fallo 4 - Error al ejecutar el comando stoy.\n");
+        
+    // Comprobamos si el resultado es 8, en tal caso quiere decir que nuestra prueba no se ha efectuado correctamente,
+    // el comando cpu ha dado problemas a la hora de su ejecución.
+    }else if (resultado == 8){
+
+        printf("Fallo 5 - Error al ejecutar el comando cpu.\n");
     }
 
 }
