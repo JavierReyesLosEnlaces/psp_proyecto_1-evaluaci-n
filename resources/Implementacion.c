@@ -470,8 +470,6 @@ void testearComando(int resultado){
         printf("Prueba 4: Pasada - El comando 'pwd' se ejecutó correctamente y tiene la longitud adecuada.\n");
     }
 
-
-
     // Comprobamos si el resultado es 1, en tal caso quiere decir que nuestra prueba no se ha efectuado correctamente, 
     // el comando que se ha introducido ha sido erróneo. 
     if(resultado == 1){
