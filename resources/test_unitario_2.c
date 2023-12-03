@@ -1,4 +1,4 @@
-//Librerias necesarias para la utilización de algunas funciones y variables 
+// Librerias necesarias para la utilización de algunas funciones y variables
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +13,7 @@
 #define MAX_LINE 80
 char *args[MAX_LINE / 2 + 1];
 
-//Declaracion de las funciones que se van a utilizar
+// Declaracion de las funciones que se van a utilizar
 int buscarPalabra(char *comando);
 int comprobarPermisos(char *ruta);
 int buscarNULL(char *valor);
@@ -22,18 +22,17 @@ int reemplazar(char *buscar, char *reemplazo, char *ruta);
 int ejecutarComando(char *comando);
 
 //----------------------------------------------------------------------------------------------------------
-    // MODIFICACION 2 -> Se crea una función que busque una palabra en todos los archivos de un directorio
-    // Sería como el ctrl + f de Visual Studio
-    // Nos muestra todas las líneas en todos los archivos que se encuentre la palabra buscada. 
-    // Creamos esta función para usar de manera más intuitiva el comando "grep"
+// MODIFICACION 2 -> Se crea una función que busque una palabra en todos los archivos de un directorio
+// Nos muestra todas las líneas en todos los archivos que se encuentre la palabra buscada.
+// Creamos esta función para usar de manera más intuitiva el comando "grep"
 //---------------------------------------------------------------------------------------------------------
 
 int buscarPalabra(char *comando)
 {
-    // Comprobar que el comando está correctamente formado
+    // Comprobar que el comando está correctamente formado.
     int i = 0;
     pid_t pid;
-    // IMPORTANTE: SE TIENE QUE INICIALIZAR A NULL LAS VARIABLES,c a veces no inicia los valores de forma correcta
+    // IMPORTANTE: SE TIENE QUE INICIALIZAR A NULL LAS VARIABLES,c a veces no inicia los valores de forma correcta.
     char *cmd = NULL, *directorio = NULL, *palabra = NULL;
 
     // Dividir *comando por espacios en blanco
@@ -58,38 +57,34 @@ int buscarPalabra(char *comando)
         i++;
     }
 
-    // Comprobamos que es el comando correcto. 
-    // Usamos "buscar" para indicar a la función que se deberá usar grep después
+    // Comprobamos que es el comando correcto.
+    // Usamos "buscar" para indicar a la función que se deberá usar grep después.
     if (strcmp("buscar", cmd) != 0)
     {
         return -1;
     }
-    //Se han introducido más de 3 valores en el array
+    // Se han introducido más de 3 valores en el array.
     if (i > 3)
     {
         return -127;
     }
-    // No se ha introducido una palabra a buscar
-    if (!palabra)
-    {
+    // Se han introducido menos valores de los que se necesitan.
+    if (i < 3){
+        
         return -126;
     }
-    // No se ha introducido un directorio
-    if (!directorio)
-    {
-        return -128;
-    }
-
-    // Ejecutamos el comando con las instrucciones en un proceso hijo. Usaremos un comando del cmd de linux para realizar esta búsqueda
+  
+    // Ejecutamos el comando con las instrucciones en un proceso hijo.
+    // Usaremos un comando del bash de linux para realizar esta búsqueda.
     char *comandoGrep = "grep";
-    //Se almacenan los argumentos que se pasarán a una llamada al comando "grep"
+    // Se almacenan los argumentos que se pasarán a una llamada al comando "grep"
     char *lista_argumentos[] = {comandoGrep, "-rni", palabra, directorio, NULL};
-    
-    //Se crea un proceso hijo
+
+    // Se crea un proceso hijo
     pid = fork();
     if (pid == 0)
-    {   
-        //Se usa la función execvp para que muestre el resultado
+    {
+        // Se usa la función execvp para que muestre el resultado
         int status_code = execvp(comandoGrep, lista_argumentos);
         return EXIT_SUCCESS;
     }
@@ -99,21 +94,21 @@ int buscarPalabra(char *comando)
         return EXIT_SUCCESS;
     }
     else
-    {  //No se ha podido crear el proceso hijo
+    { // No se ha podido crear el proceso hijo
         return -1;
     }
 }
 
-        //----------------------------------------------------------------------------------------------------------
-                     // MODIFICACION 3 -> Se crea una función que busque una palabra en un fichero y la sustituya por otra
-                    // Dará exito si se ha encontrado la palabra y se ha podido sustituir por otra
-                    //Se comprueban si los valores dados a la función son nulos o vacíos. De ser así retorna error
-        //----------------------------------------------------------------------------------------------------------
-
+//----------------------------------------------------------------------------------------------------------
+// MODIFICACION 3 -> Se crea una función que busque una palabra en un fichero y la sustituya por otra
+// Dará exito si se ha encontrado la palabra y se ha podido sustituir por otra
+// Se comprueban si los valores dados a la función son nulos o vacíos. De ser así retorna error
+//----------------------------------------------------------------------------------------------------------
 
 // Funcion que comrpueba si se tienen permisos sobre el fichero a modificar
 int comprobarPermisos(char *ruta)
-{    //La función accces, comprueba los persmisos que se tienen. W_OK comprueba permisos de escritura (W -> write)
+{   // La función accces, comprueba los persmisos que se tienen. 
+    // W_OK comprueba permisos de escritura (W -> write)
     if (access(ruta, W_OK) == 0)
     {
         return 0;
@@ -123,11 +118,12 @@ int comprobarPermisos(char *ruta)
 // Funcion que comprueba que los datos no son NULL o están vacíos
 int buscarNULL(char *valor)
 {
-
+    // Si el valor es NULL
     if (valor == NULL)
     {
         return 0;
     }
+    // Si el valor es vacío
     else if (valor[0] == '\0')
     {
         return 0;
@@ -146,19 +142,16 @@ int reemplazar(char *buscar, char *reemplazo, char *ruta)
 {
 
     // Comprobamos si los valores de no son NULL o están vacíos
-
     int resultadoBuscar = buscarNULL(buscar);
     if (resultadoBuscar == 0)
     {
         return EXIT_FAILURE;
     }
-
     int resultadoReemplazo = buscarNULL(reemplazo);
     if (resultadoReemplazo == 0)
     {
         return EXIT_FAILURE;
     }
-
     int resultadoRuta = buscarNULL(ruta);
     if (resultadoRuta == 0)
     {
@@ -172,11 +165,19 @@ int reemplazar(char *buscar, char *reemplazo, char *ruta)
         return EXIT_FAILURE;
     }
 
+    // Comprobamos si se tiene permisos sobre el documento
+    int resultadoPermisos = comprobarPermisos(ruta);
+    if (resultadoPermisos != 0)
+    {
+        return EXIT_FAILURE;
+    }
+ 
+
     // Abrimos el fichero, si está vacío retornar error
     FILE *file = fopen(ruta, "r+");
     if (file == NULL)
     {
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // Tamaño suficiente para almacenar una palabra del archivo
@@ -196,12 +197,12 @@ int reemplazar(char *buscar, char *reemplazo, char *ruta)
     }
     // Cerramos el fichero
     fclose(file);
-    // Si todo está bien, retorna 0
+    // Si todo se ha ejecutado correctamente, retorna 0
     return 0;
 }
 //------------------------------------------------------------------------------------------------------------------
-    //      MODIFICACION 1 -> Arreglar el funcionamiento de la función ejevutarComando()
-    //      Cuando se hacía el test, daba igual que comando introdujeras que siempre arrojaba el mismo resultado
+//      MODIFICACION 1 -> Arreglar el funcionamiento de la función ejecutarComando()
+//      Cuando se hacía el test, daba igual que comando introdujeras que siempre arrojaba el mismo resultado
 //------------------------------------------------------------------------------------------------------------------
 
 int ejecutarComando(char *comando)
@@ -209,7 +210,7 @@ int ejecutarComando(char *comando)
     pid_t pid = fork();
     int status_code = 100;
 
-    // proceso hijo
+    // Proceso hijo
     if (pid == 0)
     {
         char *token = strtok(comando, " ");
@@ -223,7 +224,7 @@ int ejecutarComando(char *comando)
         }
         args[i] = NULL;
 
-        // 1. MODIFICACION -> se captura en una variable el resutlado de ejecutar execvp
+        // MODIFICACION -> se captura en una variable el resutlado de ejecutar execvp
         int commad_status_code = execvp(args[0], args);
 
         // Si execvp funciona, no se escribe lo demás a partir de aquí
@@ -232,24 +233,21 @@ int ejecutarComando(char *comando)
     }
     else if (pid > 0)
     {
-
-        // Esperamos al proceso hijo a que acabe para asi comprobar la respuesta del comando (osea su status code)
+        // MODIFICACION -> Esperamos al proceso hijo a que acabe para asi comprobar la respuesta del comando (osea su status code)
         waitpid(pid, &status_code, 0);
-        
+
         if (status_code == 0)
-        {
+        { // El comando se ha podido ejectuar
             return EXIT_SUCCESS;
         }
         else
-        {
+        { // El comando no se ha podido ejecutar
             return EXIT_FAILURE;
         }
-        // devolvemos el status code del proceso hijo que ha ejecutado el comando
-        return status_code;
     }
     else
     {
-        // fallo al crear el proceso hijo
+        // Fallo al crear el proceso hijo
         return -1;
     }
 
@@ -262,14 +260,12 @@ int main()
     //-------------------------------------------------------------------------------------------
     //               TEST DE LA FUNCIÓN BUSCAR PALABRA EN TODOS LOS ARCHIVOS DE UN DIRECTORIO
     //-------------------------------------------------------------------------------------------
-
-    // Indicamos el comando, la palabra y el directorio en un mismo array
-    char comando[] = "buscar printf /home/alumno";
-    
-     // Guardamos el resultado de pasarle el comando
+      
+    // Indicamos el comando, la palabra y el directorio en un mismo array.
+    char comando[] = "buscar comando /home/alumno";
+    // Guardamos el resultado de pasarle el comando.
     int resultado = buscarPalabra(comando);
 
-    
     if (resultado == EXIT_SUCCESS)
     {
         printf("Prueba 3: Exito - se ha encontrado la palabra. \n");
@@ -278,18 +274,73 @@ int main()
     {
         printf("Prueba 3: Fallo - se han introducido más de 3 argumentos. \n");
     }
-    else if(resultado == -126){
-
-        printf("Prueba 3: Fallo - no se ha introducido la palabra a buscar. \n");
-    }
-      else if(resultado == -128){
-
-        printf("Prueba 3: Fallo - se ha introducido un directorio. \n");
+    else if (resultado == -126)
+    {
+        printf("Prueba 3: Fallo - no se ha introducido los suficientes argumentos. \n");
     }
     else
     {
-        printf("Prueba 3: Fallo - no se ha ejecutado correctamente. \n");
+        printf("Prueba 3: Fallo - no se ha podido realizar la búsqueda.\n");
     }
+
+    printf("**********************************************\n");
+
+
+
+    // Indicamos el comando, la palabra y el directorio en un mismo array.
+    // No le indicamos la palabra a buscar.
+    char comandofalso[] = "buscar /home/alumno";
+    // Guardamos el resultado de pasarle el comando.
+    int resultadoerroneo = buscarPalabra(comandofalso);
+
+    if (resultadoerroneo == EXIT_SUCCESS)
+    {
+        printf("Prueba 5: Exito - se ha encontrado la palabra. \n");
+    }
+    else if (resultadoerroneo == -127)
+    {
+        printf("Prueba 5: Fallo - se han introducido más de 3 argumentos. \n");
+    }
+    else if (resultadoerroneo == -126)
+    {
+        printf("Prueba 5: Fallo - no se ha introducido los suficientes argumentos. \n");
+    }
+    else
+    {
+        printf("Prueba 5: Fallo - no se ha podido realizar la búsqueda.\n");
+    }
+
+    printf("**********************************************\n");
+
+
+    // Indicamos el comando, la palabra y el directorio en un mismo array.
+    // Esta vez le indicamos un comando erroneo.
+    char comandofalso2[] = "xx comando /home/alumno";
+    // Guardamos el resultado de pasarle el comando
+    int resultadoerroneo2 = buscarPalabra(comandofalso2);
+
+    if (resultadoerroneo2 == EXIT_SUCCESS)
+    {
+        printf("Prueba 6: Exito - se ha encontrado la palabra. \n");
+    }
+
+    else if (resultadoerroneo2 == -127)
+    {
+        printf("Prueba 6: Fallo - se han introducido más de 3 argumentos. \n");
+    }
+    else if (resultadoerroneo2 == -126)
+    {
+        printf("Prueba 6: Fallo - no se han introducido los suficientes argumentos. \n");
+    }
+    else
+    {
+        printf("Prueba 6: Fallo - no se ha podido realizar la búsqueda.\n");
+    }
+
+    printf("**********************************************\n");
+
+
+
 
     //-------------------------------------------------------------------------------------------
     //                   TEST DE FUNCION REEMPLAZAR PALABRA POR OTRA
@@ -299,22 +350,37 @@ int main()
     char ruta[] = "/home/alumno/prueba.txt";
 
     // Guardamos el resultado de pasarle una palabra a buscar, una palabra a cambiar y la ruta
-    int resultado3 = reemplazar("burpepes", "cc", ruta);
+    int resultado3 = reemplazar("gateteses", "marmotas", ruta);
 
-    // TEST:
     if (resultado3 == 0)
     {
-        printf("Prueba 4: éxito - se han cambiado los datos con éxito.\n");
+        printf("Prueba 7: Éxito - se ha ejecutado la función con éxito.\n");
     }
     // Si el resultado es
     else if (resultado3 == EXIT_FAILURE)
     {
-        printf("Prueba 4: fallo - los datos son nulos.\n");
+        printf("Prueba 7: Fallo - los datos no son correctos\n");
     }
-    else
+  
+
+    printf("**********************************************\n");
+
+
+    // Definimos la ruta a buscar. Esta vez no apunta a un fichero.
+    char rutaerronea[] = "/home/alumno";
+    // Guardamos el resultado de pasarle una palabra a buscar, una palabra a cambiar y la ruta
+    int resultadoremplazo = reemplazar("marmotas", "aguacates", rutaerronea);
+
+    if (resultadoremplazo == 0)
     {
-        printf("Prueba 4: fallo - no se han encontrado los datos\n");
+        printf("Prueba 8: Éxito - se ha ejecutado la función con éxito.\n");
     }
+    else if (resultadoremplazo == EXIT_FAILURE)
+    {
+        printf("Prueba 8: Fallo - los datos no son correctos.\n");
+    }
+
+    printf("**********************************************\n");
 
 
     //-------------------------------------------------------------------------------------------
@@ -330,12 +396,14 @@ int main()
     if (resultadoexistene == EXIT_SUCCESS)
     {
         // Modificacion -> los textos se han dejado más claros
-        printf("Prueba 2: Fallida - el comando existe.\n");
+        printf("Prueba 2: Fallida - El comando existe.\n");
     }
     else if (resultadoexistene == EXIT_FAILURE)
     {
         printf("Prueba 2: Pasada - El comando inexistente no se ha encontrado.\n");
     }
+
+    printf("**********************************************\n");
 
     // Segundo TEST se comprueba si el test funciona pasandole un comando que NO existe
 
@@ -343,7 +411,7 @@ int main()
     int resultadoinexistente = ejecutarComando(comando_inexistente);
 
     if (resultadoinexistente == EXIT_SUCCESS)
-    { 
+    {
         // Modificacion de los textos para dejarlos más claros
         printf("Prueba 2: Fallida - el comando existe.\n");
     }
@@ -351,6 +419,5 @@ int main()
     {
         printf("Prueba 2: Pasada - El comando inexistente no se ha encontrado.\n");
     }
-
     return 0;
 }
