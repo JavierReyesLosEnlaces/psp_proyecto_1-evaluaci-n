@@ -87,7 +87,7 @@ int comprobarcpucommand() {
     fflush(stdout); 
     getchar();
     pid_t pid = fork();
-    int pidhijo;
+    int pidhijo=0;
     if(pid == 0){
         pidhijo= (int) getpid();
 
@@ -98,10 +98,10 @@ int comprobarcpucommand() {
         system(newComandoCpu);
         
     }else if (pid<0){
-        printf("Error al crear el proceso hijo del comando cpu.");
+        printf("Error al crear el proceso hijo con pid `%n` del comando cpu.",pidhijo);
         return 8;
     }else{
-        printf("se ha pasado al proceso padre del comando cpu.");
+        // Eesperamos a que el proceso hijo termine
         wait(NULL);
     }
     return 3;
